@@ -6,7 +6,6 @@ WORKDIR /app
 # Copy root workspace config + lockfile and frontend package.json
 COPY package.json package-lock.json ./
 COPY packages/frontend/package.json packages/frontend/
-COPY packages/backend/package.json packages/backend/
 
 # Install only the frontend workspace dependencies
 RUN npm ci --workspace=packages/frontend --include-workspace-root
