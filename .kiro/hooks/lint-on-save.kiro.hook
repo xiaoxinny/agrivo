@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Lint and Format Check",
+  "description": "When TypeScript or Python files are edited, remind the agent to check for linting and formatting issues.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Check the edited file for linting errors, formatting issues, and type errors using getDiagnostics. Fix any issues found."
+  }
+}

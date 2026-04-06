@@ -65,4 +65,4 @@ ENV/
 .vscode/
 
 # ----- Kiro -----
-.kiro/
+# .kiro/

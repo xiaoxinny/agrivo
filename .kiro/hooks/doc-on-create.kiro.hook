@@ -1,0 +1,18 @@
+{
+  "enabled": true,
+  "name": "Documentation Reminder",
+  "description": "When new source files are created, ensure they have proper documentation headers, JSDoc/docstrings, and that relevant docs in /docs are updated if needed.",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "packages/**/*.ts",
+      "packages/**/*.tsx",
+      "packages/**/*.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Ensure this new file has: 1) A module-level doc comment explaining its purpose, 2) JSDoc/TSDoc or Python docstrings on all exported functions and classes, 3) Comprehensive inline comments for complex logic. Add any missing documentation."
+  }
+}

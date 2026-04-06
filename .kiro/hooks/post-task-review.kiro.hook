@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Post-Task Code Review",
+  "description": "After each spec task completes, review the changed files for code quality, stale code, security issues, and ensure comprehensive comments and documentation are present.",
+  "version": "1",
+  "when": {
+    "type": "postTaskExecution"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Review all files changed during this task. Check for: 1) Stale or dead code that should be removed, 2) Missing or incomplete code comments and documentation, 3) Hardcoded secrets or sensitive values, 4) Security concerns, 5) Code that doesn't follow project conventions. Fix any issues found."
+  }
+}
