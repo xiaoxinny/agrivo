@@ -25,11 +25,15 @@ export function IsaacSimViewport({ connectionStatus, streamUrl }: IsaacSimViewpo
         streamUrl.startsWith("http://") || streamUrl.startsWith("https://")
           ? new URL(streamUrl)
           : new URL(streamUrl, window.location.origin);
+      // Only allow http(s) protocols to avoid navigation to unexpected schemes
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        return "";
+      }
       url.searchParams.set("quality", quality);
       return url.toString();
     } catch {
-      // If the URL is invalid, fall back to the original string without modification
-      return streamUrl;
+      // If the URL is invalid, do not use it
+      return "";
     }
   })();
 
@@ -68,7 +72,7 @@ export function IsaacSimViewport({ connectionStatus, streamUrl }: IsaacSimViewpo
 
       {/* 16:9 aspect ratio viewport */}
       <div className={`relative overflow-hidden rounded-lg bg-gray-900 ${isFullscreen ? "fixed inset-0 z-50" : "aspect-video"}`}>
-        {isConnected && streamUrl ? (
+        {isConnected && resolvedStreamUrl ? (
           <iframe
             src={resolvedStreamUrl}
             title="Isaac Sim Viewport"
