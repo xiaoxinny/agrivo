@@ -136,7 +136,7 @@ async def callback(body: CallbackRequest, response: Response) -> AuthResponse:
         ) from exc
 
     try:
-        profile = parse_id_token_claims(tokens["id_token"])
+        profile = parse_id_token_claims(tokens["id_token"], access_token=tokens["access_token"])
     except Exception as exc:
         logger.exception("ID token validation failed")
         raise HTTPException(status_code=401, detail="Invalid ID token") from exc
@@ -167,7 +167,7 @@ async def token_refresh(request: Request, response: Response) -> AuthResponse:
 
     # Parse the new ID token to get user profile
     try:
-        profile = parse_id_token_claims(new_tokens["id_token"])
+        profile = parse_id_token_claims(new_tokens["id_token"], access_token=new_tokens["access_token"])
     except Exception as exc:
         logger.exception("ID token validation failed after refresh")
         raise HTTPException(status_code=401, detail="Token refresh failed") from exc

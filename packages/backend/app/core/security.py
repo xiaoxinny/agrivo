@@ -60,11 +60,18 @@ def _find_key(jwks: dict[str, Any], kid: str) -> dict[str, Any] | None:
     return None
 
 
-def validate_token(token: str, settings: Settings | None = None) -> dict[str, Any]:
+def validate_token(
+    token: str,
+    settings: Settings | None = None,
+    access_token: str | None = None,
+) -> dict[str, Any]:
     """Validate a Cognito-issued JWT and return its claims.
 
     If the token's ``kid`` is not found in the cached JWKS, the cache is
     refreshed once before rejecting the token.
+
+    Pass *access_token* when validating an ID token that contains an
+    ``at_hash`` claim so that ``python-jose`` can verify the hash.
 
     Raises ``JWTError`` when the token is invalid or expired.
     """
@@ -97,6 +104,7 @@ def validate_token(token: str, settings: Settings | None = None) -> dict[str, An
         algorithms=["RS256"],
         audience=settings.COGNITO_CLIENT_ID,
         issuer=issuer,
+        access_token=access_token,
     )
     return claims
 
@@ -189,13 +197,14 @@ async def refresh_tokens(
 def parse_id_token_claims(
     id_token: str,
     settings: Settings | None = None,
+    access_token: str | None = None,
 ) -> dict[str, Any]:
     """Validate an ID token and extract user profile claims.
 
     Returns a dict with ``id`` (from ``sub``), ``email``, and ``name``
     (or ``None`` if the name claim is absent).
     """
-    claims = validate_token(id_token, settings)
+    claims = validate_token(id_token, settings, access_token=access_token)
     return {
         "id": claims["sub"],
         "email": claims["email"],
