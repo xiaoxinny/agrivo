@@ -7,6 +7,15 @@ if (!BASE_URL) {
 export const SESSION_EXPIRED_EVENT = "session-expired";
 
 /**
+ * When true, 401 responses will NOT dispatch the session-expired event.
+ * Used during the initial token refresh probe to avoid an infinite loop.
+ */
+export let suppressSessionExpired = false;
+export function setSuppressSessionExpired(value: boolean) {
+  suppressSessionExpired = value;
+}
+
+/**
  * Thin fetch wrapper that sends credentials (httpOnly cookies) with every request
  * and dispatches a `session-expired` custom event on 401 responses.
  */
@@ -21,7 +30,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
 
   if (res.status === 401) {
-    window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
+    if (!suppressSessionExpired) {
+      window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
+    }
     throw new ApiError("Session expired", 401);
   }
 

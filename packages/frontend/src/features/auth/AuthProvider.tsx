@@ -9,7 +9,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api, SESSION_EXPIRED_EVENT } from "@/lib/api";
+import { api, SESSION_EXPIRED_EVENT, setSuppressSessionExpired } from "@/lib/api";
 import {
   generateCodeVerifier,
   generateCodeChallenge,
@@ -77,9 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { isLoading } = useQuery({
     queryKey: ["auth", "refresh"],
     queryFn: async () => {
-      const data = await api.post<{ user: User }>("/auth/token/refresh");
-      setAuthState({ status: "authenticated", user: data.user });
-      return data;
+      setSuppressSessionExpired(true);
+      try {
+        const data = await api.post<{ user: User }>("/auth/token/refresh");
+        setAuthState({ status: "authenticated", user: data.user });
+        return data;
+      } finally {
+        setSuppressSessionExpired(false);
+      }
     },
     retry: false,
     refetchOnWindowFocus: false,
