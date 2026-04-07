@@ -78,12 +78,16 @@ REFRESH_TOKEN_COOKIE = "refresh_token"
 # injection if an upstream response were unexpectedly malformed.
 _JWT_RE = re.compile(r"^[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]+\.[A-Za-z0-9\-_]*$")
 
+# Cognito refresh tokens are opaque strings (not JWTs) — allow
+# alphanumeric, hyphens, underscores, dots, and plus signs.
+_OPAQUE_TOKEN_RE = re.compile(r"^[A-Za-z0-9\-_\.+/=]+$")
+
 
 def _safe_token(value: str, name: str) -> str:
-    """Raise ValueError if *value* is not a well-formed JWT."""
-    if not _JWT_RE.match(value):
-        raise ValueError(f"Unexpected format for {name}")
-    return value
+    """Raise ValueError if *value* contains unsafe characters."""
+    if _JWT_RE.match(value) or _OPAQUE_TOKEN_RE.match(value):
+        return value
+    raise ValueError(f"Unexpected format for {name}")
 
 
 def _set_auth_cookies(response: Response, tokens: dict) -> None:
