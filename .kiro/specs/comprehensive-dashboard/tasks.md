@@ -15,7 +15,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Add `GET /farms/trends` endpoint returning sparkline data
     - _Requirements: 1.2, 1.4, 2.2, 2.3_
 
-  - [ ]* 1.2 Write property tests for time-series and trends mock data (backend)
+  - [x]* 1.2 Write property tests for time-series and trends mock data (backend)
     - **Property 1: Time-series data interval consistency** — verify point count = hours*2 and consecutive timestamps differ by 30 min
     - **Property 4: Mock sensor data falls within realistic agricultural ranges** — verify temperature ∈ [20,35], humidity ∈ [50,90], soil moisture ∈ [30,70]
     - **Validates: Requirements 1.2, 1.4, 2.3**
@@ -26,7 +26,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Update `get_alerts` endpoint to return alerts sorted by severity (critical → warning → info)
     - _Requirements: 3.1, 3.2, 3.3_
 
-  - [ ]* 2.2 Write property test for alert severity sorting (backend)
+  - [x]* 2.2 Write property test for alert severity sorting (backend)
     - **Property 5: Alerts are sorted by severity** — for any list of alerts with mixed severities, after sorting, critical before warning before info
     - **Validates: Requirements 3.3**
 
@@ -38,7 +38,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Register weather router in `packages/backend/app/api/router.py`
     - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-  - [ ]* 3.2 Write property test for weather data ranges (backend)
+  - [x]* 3.2 Write property test for weather data ranges (backend)
     - **Property 7: Mock weather data is consistent with tropical region** — verify temp ∈ [24,36], humidity ∈ [55,95]
     - **Validates: Requirements 4.4**
 
@@ -59,7 +59,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Register robots router in `packages/backend/app/api/router.py`
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-  - [ ]* 5.2 Write property test for robot fleet summary counts (backend)
+  - [x]* 5.2 Write property test for robot fleet summary counts (backend)
     - **Property 12: Robot fleet summary counts match data** — verify summary counts equal the count of robots with each status
     - **Validates: Requirements 8.2**
 
@@ -94,7 +94,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Show loading skeletons and ErrorRetry on error
     - _Requirements: 2.1, 9.1, 9.4_
 
-  - [ ]* 9.3 Write property test for sparkline card rendering
+  - [x]* 9.3 Write property test for sparkline card rendering
     - **Property 3: Sparkline card renders trend data for all metrics** — for any valid trends response, verify a sparkline card is rendered for each metric
     - **Validates: Requirements 2.1**
 
@@ -106,7 +106,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Show loading skeleton and ErrorRetry on error
     - _Requirements: 1.1, 1.3, 1.5_
 
-  - [ ]* 10.2 Write property test for chart line count
+  - [x]* 10.2 Write property test for chart line count
     - **Property 2: Chart renders all sensor type lines** — for any response with N sensor types, verify N line series rendered
     - **Validates: Requirements 1.1**
 
@@ -115,7 +115,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Modify `packages/frontend/src/features/dashboard/AlertsWidget.tsx` to sort fetched alerts by severity: critical → warning → info
     - _Requirements: 3.3_
 
-  - [ ]* 11.2 Write property test for alert severity sorting (frontend)
+  - [x]* 11.2 Write property test for alert severity sorting (frontend)
     - **Property 5: Alerts are sorted by severity** — for any list of alerts with mixed severities, verify ordering invariant after sort
     - **Validates: Requirements 3.3**
 
@@ -128,7 +128,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Show loading skeleton and ErrorRetry on error
     - _Requirements: 4.1, 4.2_
 
-  - [ ]* 12.2 Write property test for weather widget field completeness
+  - [x]* 12.2 Write property test for weather widget field completeness
     - **Property 6: Weather widget displays all required fields** — for any valid weather data, verify temperature, humidity, wind speed, and condition are rendered
     - **Validates: Requirements 4.1**
 
@@ -140,7 +140,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Show loading skeleton and ErrorRetry on error
     - _Requirements: 5.1, 5.2_
 
-  - [ ]* 13.2 Write property test for crop health zone completeness
+  - [x]* 13.2 Write property test for crop health zone completeness
     - **Property 8: Crop health zone data completeness** — for any valid zone data, verify health status, crop type, growth stage, and inspection date are rendered
     - **Validates: Requirements 5.1, 5.2**
 
@@ -154,7 +154,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Show loading skeleton and ErrorRetry on error
     - _Requirements: 8.1, 8.2, 8.5_
 
-  - [ ]* 14.2 Write property tests for robot fleet widget
+  - [x]* 14.2 Write property tests for robot fleet widget
     - **Property 13: Robot fleet displays all required fields** — for any valid robot data, verify name, type, status, and zone are rendered
     - **Property 14: Maintenance robots are highlighted** — for any robot list, verify warning indicator iff status = "maintenance"
     - **Validates: Requirements 8.1, 8.5**
@@ -185,7 +185,7 @@ Transform the existing AgriTech dashboard into a data-rich, production-quality d
     - Show prompt to connect first if connection status is disconnected
     - _Requirements: 10.1, 10.3, 10.4_
 
-  - [ ]* 15.4 Write property tests for Isaac Sim components
+  - [x]* 15.4 Write property tests for Isaac Sim components
     - **Property 9: Isaac Sim connection status indicator correctness** — for any status value, verify correct color class
     - **Property 10: Isaac Sim connection config validation** — for any host/port input, verify validation accepts iff host non-empty and port ∈ [1,65535]
     - **Property 11: Isaac Sim config localStorage round-trip** — for any valid config, verify serialize/deserialize produces equivalent object
