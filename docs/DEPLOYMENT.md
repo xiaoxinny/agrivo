@@ -363,12 +363,14 @@ In the Coolify resource settings, add these environment variables:
 
 ### 2.4 Configure Domains
 
-In Coolify, assign domains to each service:
+In Coolify, assign domains to each service. If using Cloudflare Tunnel with a wildcard DNS record (e.g., `*.yourdomain.com`), use single-level subdomains only — Cloudflare wildcards don't match multi-level subdomains like `api.app.yourdomain.com`.
 
-- **frontend**: `agritech.example.com` → port 80
-- **backend**: `api.agritech.example.com` → port 8000
+- **frontend**: `app.yourdomain.com` → port 80
+- **backend**: `app-api.yourdomain.com` → port 8000
 
-Coolify auto-provisions SSL certificates via Let's Encrypt.
+Coolify auto-configures Traefik routing. If using Cloudflare Tunnel, Traefik receives HTTP traffic internally (Cloudflare terminates TLS), so configure domains with `http://` prefix in Coolify.
+
+**Important:** The frontend container healthcheck uses `curl` (available in nginx:alpine). If the healthcheck fails, Traefik returns 404 for the domain.
 
 ### 2.5 Deploy
 
@@ -444,6 +446,15 @@ Ensure the IAM user has `s3:GetObject` permission on the `agritech-simulations` 
 
 **Redirect URI mismatch:**
 Ensure `COGNITO_REDIRECT_URI` matches exactly what's configured in the Cognito app client callback URLs. The value must be identical — including protocol, domain, and path (e.g., `https://your-domain.com/auth/callback`).
+
+**Cloudflare Tunnel 404:**
+If using Cloudflare Tunnel with Coolify, ensure the container healthcheck passes. Traefik removes unhealthy containers from routing and returns 404. Check container logs and healthcheck status in Coolify.
+
+**Cloudflare Tunnel SSL errors (ERR_SSL_VERSION_OR_CIPHER_MISMATCH):**
+Cloudflare wildcard DNS (`*.yourdomain.com`) only matches single-level subdomains. `api.app.yourdomain.com` won't match — use `app-api.yourdomain.com` instead. Also ensure the Cloudflare SSL mode is set to "Full" (not "Full (strict)") since Traefik serves HTTP internally behind the tunnel.
+
+**Mixed content errors:**
+Ensure `VITE_API_URL` uses `https://` (not `http://`). The frontend is served over HTTPS via Cloudflare, so all API requests must also use HTTPS.
 
 **Invalid grant on callback:**
 The authorization code is single-use and expires in 5 minutes. Ensure the backend exchanges it promptly. If you see this error, the code may have already been used or expired.

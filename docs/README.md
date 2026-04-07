@@ -11,6 +11,7 @@ A full-stack web application for an agri-tech startup based in Singapore. The pl
 - **React Router v7** — client-side routing
 - **TanStack Query v5** — server state management with polling
 - **Tailwind CSS v4** — utility-first styling
+- **Recharts v3** — interactive charts and sparklines
 - **Lucide React** — icon library
 - **shadcn/ui conventions** — component patterns (cn utility, CSS variables)
 
@@ -42,7 +43,11 @@ A full-stack web application for an agri-tech startup based in Singapore. The pl
 │   │   │   ├── features/
 │   │   │   │   ├── landing/           # Public landing page sections
 │   │   │   │   ├── auth/              # Login, CallbackPage, AuthProvider, ProtectedRoute
-│   │   │   │   └── dashboard/         # Dashboard layout and widgets
+│   │   │   │   └── dashboard/         # Dashboard layout, overview, and widgets
+│   │   │   │                          #   MetricsOverview, DashboardOverview, SparklineCard
+│   │   │   │                          #   SensorTimeSeriesChart, WeatherWidget, CropHealthWidget
+│   │   │   │                          #   RobotFleetWidget, IsaacSimPanel, IsaacSimViewport
+│   │   │   │                          #   IsaacSimScenarioList, AlertsWidget, SensorDataWidget
 │   │   │   ├── hooks/                 # Custom React hooks
 │   │   │   ├── lib/                   # API client, utilities
 │   │   │   └── types/                 # TypeScript type definitions
@@ -51,7 +56,7 @@ A full-stack web application for an agri-tech startup based in Singapore. The pl
 │   │   └── package.json
 │   └── backend/
 │       ├── app/
-│       │   ├── api/                   # Route handlers (auth, farms, simulations)
+│       │   ├── api/                   # Route handlers (auth, farms, simulations, weather, crops, robots)
 │       │   ├── core/                  # Config, security, dependency injection
 │       │   ├── models/                # Pydantic / SQLAlchemy models
 │       │   ├── services/              # Business logic layer
@@ -130,17 +135,21 @@ VITE_COGNITO_REDIRECT_URI=http://localhost:5173/auth/callback
 
 ### Routing (Frontend)
 
-| Path                         | Component          | Auth Required |
-| ---------------------------- | ------------------ | ------------- |
-| `/`                          | LandingPage        | No            |
-| `/login`                     | LoginPage          | No            |
-| `/auth/callback`             | CallbackPage       | No            |
-| `/dashboard`                 | DashboardLayout    | Yes           |
-| `/dashboard/sensors`         | SensorDataWidget   | Yes           |
-| `/dashboard/alerts`          | AlertsWidget       | Yes           |
-| `/dashboard/analytics`       | AnalyticsWidget    | Yes           |
-| `/dashboard/simulations`     | SimulationList     | Yes           |
-| `/dashboard/simulations/:id` | SimulationViewer   | Yes (lazy)    |
+| Path                         | Component              | Auth Required |
+| ---------------------------- | ---------------------- | ------------- |
+| `/`                          | LandingPage            | No            |
+| `/login`                     | LoginPage              | No            |
+| `/auth/callback`             | CallbackPage           | No            |
+| `/dashboard`                 | DashboardOverview      | Yes           |
+| `/dashboard/sensors`         | SensorDataWidget       | Yes           |
+| `/dashboard/alerts`          | AlertsWidget           | Yes           |
+| `/dashboard/analytics`       | SensorTimeSeriesChart  | Yes           |
+| `/dashboard/weather`         | WeatherWidget          | Yes           |
+| `/dashboard/crop-health`     | CropHealthWidget       | Yes           |
+| `/dashboard/robot-fleet`     | RobotFleetWidget       | Yes           |
+| `/dashboard/isaac-sim`       | IsaacSimPanel          | Yes           |
+| `/dashboard/simulations`     | SimulationList         | Yes           |
+| `/dashboard/simulations/:id` | SimulationViewer       | Yes (lazy)    |
 
 Protected routes are wrapped in `ProtectedRoute`, which redirects unauthenticated users to `/login`. The `SimulationViewer` is lazy-loaded via `React.lazy()` with a `Suspense` fallback.
 
@@ -148,18 +157,25 @@ Protected routes are wrapped in `ProtectedRoute`, which redirects unauthenticate
 
 All endpoints are prefixed with `/api`.
 
-| Method | Path                        | Description                          | Auth |
-| ------ | --------------------------- | ------------------------------------ | ---- |
-| POST   | `/api/auth/callback`        | Exchange authorization code for tokens | No   |
-| POST   | `/api/auth/logout`          | Clear auth cookies, return Cognito logout URL | No   |
-| GET    | `/api/auth/me`              | Current user profile                 | Yes  |
-| POST   | `/api/auth/token/refresh`   | Refresh access token via cookie      | No   |
-| GET    | `/api/farms/overview`       | Farm overview with aggregated metrics| Yes  |
-| GET    | `/api/farms/sensors`        | Latest sensor readings               | Yes  |
-| GET    | `/api/farms/alerts`         | Active farm alerts                   | Yes  |
-| GET    | `/api/simulations`          | List available simulations           | Yes  |
-| GET    | `/api/simulations/{id}`     | Simulation detail with signed S3 URL | Yes  |
-| GET    | `/api/health`               | Health check                         | No   |
+| Method | Path                              | Description                              | Auth |
+| ------ | --------------------------------- | ---------------------------------------- | ---- |
+| POST   | `/api/auth/callback`              | Exchange authorization code for tokens   | No   |
+| POST   | `/api/auth/logout`                | Clear auth cookies, return logout URL    | No   |
+| GET    | `/api/auth/me`                    | Current user profile                     | Yes  |
+| POST   | `/api/auth/token/refresh`         | Refresh access token via cookie          | No   |
+| GET    | `/api/farms/overview`             | Farm overview with aggregated metrics    | Yes  |
+| GET    | `/api/farms/sensors`              | Latest sensor readings                   | Yes  |
+| GET    | `/api/farms/sensors/timeseries`   | Sensor time-series data (30-min intervals) | Yes |
+| GET    | `/api/farms/trends`               | Sparkline trend data for metric cards    | Yes  |
+| GET    | `/api/farms/alerts`               | Active farm alerts (sorted by severity)  | Yes  |
+| GET    | `/api/weather/current`            | Current weather conditions               | Yes  |
+| GET    | `/api/weather/forecast`           | 5-day weather forecast                   | Yes  |
+| GET    | `/api/crops/health`               | Crop health by farm zone                 | Yes  |
+| GET    | `/api/robots/fleet`               | Robot fleet status with summary counts   | Yes  |
+| GET    | `/api/simulations`                | List available simulations               | Yes  |
+| GET    | `/api/simulations/scenarios`      | Isaac Sim predefined scenarios           | Yes  |
+| GET    | `/api/simulations/{id}`           | Simulation detail with signed S3 URL     | Yes  |
+| GET    | `/api/health`                     | Health check                             | No   |
 
 ### Authentication Flow
 
@@ -175,7 +191,17 @@ JWT tokens are stored in httpOnly cookies (never in localStorage).
 
 ### Data Fetching
 
-Dashboard widgets use TanStack Query with `refetchInterval: 30000` (30s polling). Each widget has its own query key for granular cache invalidation. Failed requests show an `ErrorRetry` component with a retry button.
+Dashboard widgets use TanStack Query with `refetchInterval: 30000` (30s polling) or `60000` (60s) depending on the data type. Each widget has its own query key for granular cache invalidation. Failed requests show an `ErrorRetry` component with a retry button.
+
+The dashboard overview page (`/dashboard`) displays sparkline metric cards with 12-hour trend data, a sensor trends summary, and recent alerts in a responsive grid layout. The analytics page renders interactive Recharts line charts with 24-hour sensor time-series data.
+
+### NVIDIA Isaac Sim Integration
+
+The Isaac Sim panel (`/dashboard/isaac-sim`) provides:
+- Connection configuration (host, port, streaming URL) persisted in localStorage
+- Connection status indicator with state machine (disconnected → connecting → connected/error)
+- 16:9 viewport embed area for WebRTC/iframe streaming from Isaac Sim
+- Predefined simulation scenarios (crop inspection drone, autonomous harvester, pest patrol rover, irrigation monitoring drone)
 
 ### Error Handling (Backend)
 
@@ -212,13 +238,15 @@ uvicorn app.main:app --reload    # Dev server with hot reload
 ### Testing
 
 ```bash
-# Frontend tests (Vitest + React Testing Library)
+# Frontend tests (Vitest + React Testing Library + fast-check)
 npm run test --workspace=packages/frontend
 
-# Backend tests (pytest + httpx)
+# Backend tests (pytest + hypothesis)
 cd packages/backend
 python -m pytest tests/ -v
 ```
+
+The test suite includes property-based tests using `fast-check` (frontend) and `hypothesis` (backend) that verify 15 correctness properties covering data ranges, sorting invariants, component rendering completeness, and round-trip serialization.
 
 ## Deployment
 
